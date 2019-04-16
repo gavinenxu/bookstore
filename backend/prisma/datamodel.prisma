@@ -1,17 +1,27 @@
-# type Post {
-#   id: ID! @unique
-#   published: Boolean! @default(value: "false")
-#   title: String!
-#   content: String!
-# }
-
 type Book {
-  id: Id! @unique
+  id: ID! @unique
   primary_isbn: String!
+  title: String!
   authors: [Author!]!
+  bookkey: String
+  isbns: [String]
+  price: String
+  amazon_rank: Int
+  publisher: String
+  primary_bisacs: [String]
+  description: String
+  active: Boolean
+  image: String
 }
 
 type Author {
-  id: Id! @unique
-  role: Int!
+  id: ID! @unique
+  role: Int
+  firebrand_role: String
+  short_bio: String
+  firebrand_id: Int
+  display_name: String
+  first_name: String
+  last_name: String
+  slug: String
 }

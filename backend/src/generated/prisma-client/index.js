@@ -11,15 +11,11 @@ var models = [
   {
     name: "Author",
     embedded: false
-  },
-  {
-    name: "Id",
-    embedded: false
   }
 ];
 exports.Prisma = prisma_lib_1.makePrismaClientClass({
   typeDefs,
   models,
-  endpoint: `https://us1.prisma.sh/public-roselantern-723/backend/dev`
+  endpoint: `https://us1.prisma.sh/enxu-guan-8da890/bookstore/dev`
 });
 exports.prisma = new exports.Prisma();

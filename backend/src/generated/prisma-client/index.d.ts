@@ -16,7 +16,6 @@ export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> &
 export interface Exists {
   author: (where?: AuthorWhereInput) => Promise<boolean>;
   book: (where?: BookWhereInput) => Promise<boolean>;
-  id: (where?: IdWhereInput) => Promise<boolean>;
 }
 
 export interface Node {}
@@ -38,6 +37,7 @@ export interface Prisma {
    * Queries
    */
 
+  author: (where: AuthorWhereUniqueInput) => AuthorPromise;
   authors: (
     args?: {
       where?: AuthorWhereInput;
@@ -60,6 +60,7 @@ export interface Prisma {
       last?: Int;
     }
   ) => AuthorConnectionPromise;
+  book: (where: BookWhereUniqueInput) => BookPromise;
   books: (
     args?: {
       where?: BookWhereInput;
@@ -82,29 +83,6 @@ export interface Prisma {
       last?: Int;
     }
   ) => BookConnectionPromise;
-  id: (where: IdWhereUniqueInput) => IdPromise;
-  ids: (
-    args?: {
-      where?: IdWhereInput;
-      orderBy?: IdOrderByInput;
-      skip?: Int;
-      after?: String;
-      before?: String;
-      first?: Int;
-      last?: Int;
-    }
-  ) => FragmentableArray<Id>;
-  idsConnection: (
-    args?: {
-      where?: IdWhereInput;
-      orderBy?: IdOrderByInput;
-      skip?: Int;
-      after?: String;
-      before?: String;
-      first?: Int;
-      last?: Int;
-    }
-  ) => IdConnectionPromise;
   node: (args: { id: ID_Output }) => Node;
 
   /**
@@ -112,31 +90,37 @@ export interface Prisma {
    */
 
   createAuthor: (data: AuthorCreateInput) => AuthorPromise;
+  updateAuthor: (
+    args: { data: AuthorUpdateInput; where: AuthorWhereUniqueInput }
+  ) => AuthorPromise;
   updateManyAuthors: (
     args: { data: AuthorUpdateManyMutationInput; where?: AuthorWhereInput }
   ) => BatchPayloadPromise;
+  upsertAuthor: (
+    args: {
+      where: AuthorWhereUniqueInput;
+      create: AuthorCreateInput;
+      update: AuthorUpdateInput;
+    }
+  ) => AuthorPromise;
+  deleteAuthor: (where: AuthorWhereUniqueInput) => AuthorPromise;
   deleteManyAuthors: (where?: AuthorWhereInput) => BatchPayloadPromise;
   createBook: (data: BookCreateInput) => BookPromise;
+  updateBook: (
+    args: { data: BookUpdateInput; where: BookWhereUniqueInput }
+  ) => BookPromise;
   updateManyBooks: (
     args: { data: BookUpdateManyMutationInput; where?: BookWhereInput }
   ) => BatchPayloadPromise;
-  deleteManyBooks: (where?: BookWhereInput) => BatchPayloadPromise;
-  createId: (data: IdCreateInput) => IdPromise;
-  updateId: (
-    args: { data: IdUpdateInput; where: IdWhereUniqueInput }
-  ) => IdPromise;
-  updateManyIds: (
-    args: { data: IdUpdateManyMutationInput; where?: IdWhereInput }
-  ) => BatchPayloadPromise;
-  upsertId: (
+  upsertBook: (
     args: {
-      where: IdWhereUniqueInput;
-      create: IdCreateInput;
-      update: IdUpdateInput;
+      where: BookWhereUniqueInput;
+      create: BookCreateInput;
+      update: BookUpdateInput;
     }
-  ) => IdPromise;
-  deleteId: (where: IdWhereUniqueInput) => IdPromise;
-  deleteManyIds: (where?: IdWhereInput) => BatchPayloadPromise;
+  ) => BookPromise;
+  deleteBook: (where: BookWhereUniqueInput) => BookPromise;
+  deleteManyBooks: (where?: BookWhereInput) => BatchPayloadPromise;
 
   /**
    * Subscriptions
@@ -152,7 +136,6 @@ export interface Subscription {
   book: (
     where?: BookSubscriptionWhereInput
   ) => BookSubscriptionPayloadSubscription;
-  id: (where?: IdSubscriptionWhereInput) => IdSubscriptionPayloadSubscription;
 }
 
 export interface ClientConstructor<T> {
@@ -163,11 +146,25 @@ export interface ClientConstructor<T> {
  * Types
  */
 
-export type BookOrderByInput =
-  | "primary_isbn_ASC"
-  | "primary_isbn_DESC"
+export type AuthorOrderByInput =
   | "id_ASC"
   | "id_DESC"
+  | "role_ASC"
+  | "role_DESC"
+  | "firebrand_role_ASC"
+  | "firebrand_role_DESC"
+  | "short_bio_ASC"
+  | "short_bio_DESC"
+  | "firebrand_id_ASC"
+  | "firebrand_id_DESC"
+  | "display_name_ASC"
+  | "display_name_DESC"
+  | "first_name_ASC"
+  | "first_name_DESC"
+  | "last_name_ASC"
+  | "last_name_DESC"
+  | "slug_ASC"
+  | "slug_DESC"
   | "createdAt_ASC"
   | "createdAt_DESC"
   | "updatedAt_ASC"
@@ -175,65 +172,71 @@ export type BookOrderByInput =
 
 export type MutationType = "CREATED" | "UPDATED" | "DELETED";
 
-export type AuthorOrderByInput =
-  | "role_ASC"
-  | "role_DESC"
+export type BookOrderByInput =
   | "id_ASC"
   | "id_DESC"
+  | "primary_isbn_ASC"
+  | "primary_isbn_DESC"
+  | "title_ASC"
+  | "title_DESC"
+  | "bookkey_ASC"
+  | "bookkey_DESC"
+  | "price_ASC"
+  | "price_DESC"
+  | "amazon_rank_ASC"
+  | "amazon_rank_DESC"
+  | "publisher_ASC"
+  | "publisher_DESC"
+  | "description_ASC"
+  | "description_DESC"
+  | "active_ASC"
+  | "active_DESC"
+  | "image_ASC"
+  | "image_DESC"
   | "createdAt_ASC"
   | "createdAt_DESC"
   | "updatedAt_ASC"
   | "updatedAt_DESC";
 
-export type IdOrderByInput =
-  | "oid_ASC"
-  | "oid_DESC"
-  | "id_ASC"
-  | "id_DESC"
-  | "createdAt_ASC"
-  | "createdAt_DESC"
-  | "updatedAt_ASC"
-  | "updatedAt_DESC";
-
-export interface BookCreateInput {
-  _id: IdCreateOneInput;
-  primary_isbn: String;
-  authors?: AuthorCreateManyInput;
+export interface BookCreateprimary_bisacsInput {
+  set?: String[] | String;
 }
 
-export interface IdWhereInput {
-  oid?: ID_Input;
-  oid_not?: ID_Input;
-  oid_in?: ID_Input[] | ID_Input;
-  oid_not_in?: ID_Input[] | ID_Input;
-  oid_lt?: ID_Input;
-  oid_lte?: ID_Input;
-  oid_gt?: ID_Input;
-  oid_gte?: ID_Input;
-  oid_contains?: ID_Input;
-  oid_not_contains?: ID_Input;
-  oid_starts_with?: ID_Input;
-  oid_not_starts_with?: ID_Input;
-  oid_ends_with?: ID_Input;
-  oid_not_ends_with?: ID_Input;
-  AND?: IdWhereInput[] | IdWhereInput;
-  OR?: IdWhereInput[] | IdWhereInput;
-  NOT?: IdWhereInput[] | IdWhereInput;
+export interface AuthorUpdateDataInput {
+  role?: Int;
+  firebrand_role?: String;
+  short_bio?: String;
+  firebrand_id?: Int;
+  display_name?: String;
+  first_name?: String;
+  last_name?: String;
+  slug?: String;
 }
 
-export interface AuthorSubscriptionWhereInput {
-  mutation_in?: MutationType[] | MutationType;
-  updatedFields_contains?: String;
-  updatedFields_contains_every?: String[] | String;
-  updatedFields_contains_some?: String[] | String;
-  node?: AuthorWhereInput;
-  AND?: AuthorSubscriptionWhereInput[] | AuthorSubscriptionWhereInput;
-  OR?: AuthorSubscriptionWhereInput[] | AuthorSubscriptionWhereInput;
-  NOT?: AuthorSubscriptionWhereInput[] | AuthorSubscriptionWhereInput;
+export type AuthorWhereUniqueInput = AtLeastOne<{
+  id: ID_Input;
+}>;
+
+export interface AuthorUpdateWithWhereUniqueNestedInput {
+  where: AuthorWhereUniqueInput;
+  data: AuthorUpdateDataInput;
 }
 
 export interface AuthorWhereInput {
-  _id?: IdWhereInput;
+  id?: ID_Input;
+  id_not?: ID_Input;
+  id_in?: ID_Input[] | ID_Input;
+  id_not_in?: ID_Input[] | ID_Input;
+  id_lt?: ID_Input;
+  id_lte?: ID_Input;
+  id_gt?: ID_Input;
+  id_gte?: ID_Input;
+  id_contains?: ID_Input;
+  id_not_contains?: ID_Input;
+  id_starts_with?: ID_Input;
+  id_not_starts_with?: ID_Input;
+  id_ends_with?: ID_Input;
+  id_not_ends_with?: ID_Input;
   role?: Int;
   role_not?: Int;
   role_in?: Int[] | Int;
@@ -242,37 +245,277 @@ export interface AuthorWhereInput {
   role_lte?: Int;
   role_gt?: Int;
   role_gte?: Int;
+  firebrand_role?: String;
+  firebrand_role_not?: String;
+  firebrand_role_in?: String[] | String;
+  firebrand_role_not_in?: String[] | String;
+  firebrand_role_lt?: String;
+  firebrand_role_lte?: String;
+  firebrand_role_gt?: String;
+  firebrand_role_gte?: String;
+  firebrand_role_contains?: String;
+  firebrand_role_not_contains?: String;
+  firebrand_role_starts_with?: String;
+  firebrand_role_not_starts_with?: String;
+  firebrand_role_ends_with?: String;
+  firebrand_role_not_ends_with?: String;
+  short_bio?: String;
+  short_bio_not?: String;
+  short_bio_in?: String[] | String;
+  short_bio_not_in?: String[] | String;
+  short_bio_lt?: String;
+  short_bio_lte?: String;
+  short_bio_gt?: String;
+  short_bio_gte?: String;
+  short_bio_contains?: String;
+  short_bio_not_contains?: String;
+  short_bio_starts_with?: String;
+  short_bio_not_starts_with?: String;
+  short_bio_ends_with?: String;
+  short_bio_not_ends_with?: String;
+  firebrand_id?: Int;
+  firebrand_id_not?: Int;
+  firebrand_id_in?: Int[] | Int;
+  firebrand_id_not_in?: Int[] | Int;
+  firebrand_id_lt?: Int;
+  firebrand_id_lte?: Int;
+  firebrand_id_gt?: Int;
+  firebrand_id_gte?: Int;
+  display_name?: String;
+  display_name_not?: String;
+  display_name_in?: String[] | String;
+  display_name_not_in?: String[] | String;
+  display_name_lt?: String;
+  display_name_lte?: String;
+  display_name_gt?: String;
+  display_name_gte?: String;
+  display_name_contains?: String;
+  display_name_not_contains?: String;
+  display_name_starts_with?: String;
+  display_name_not_starts_with?: String;
+  display_name_ends_with?: String;
+  display_name_not_ends_with?: String;
+  first_name?: String;
+  first_name_not?: String;
+  first_name_in?: String[] | String;
+  first_name_not_in?: String[] | String;
+  first_name_lt?: String;
+  first_name_lte?: String;
+  first_name_gt?: String;
+  first_name_gte?: String;
+  first_name_contains?: String;
+  first_name_not_contains?: String;
+  first_name_starts_with?: String;
+  first_name_not_starts_with?: String;
+  first_name_ends_with?: String;
+  first_name_not_ends_with?: String;
+  last_name?: String;
+  last_name_not?: String;
+  last_name_in?: String[] | String;
+  last_name_not_in?: String[] | String;
+  last_name_lt?: String;
+  last_name_lte?: String;
+  last_name_gt?: String;
+  last_name_gte?: String;
+  last_name_contains?: String;
+  last_name_not_contains?: String;
+  last_name_starts_with?: String;
+  last_name_not_starts_with?: String;
+  last_name_ends_with?: String;
+  last_name_not_ends_with?: String;
+  slug?: String;
+  slug_not?: String;
+  slug_in?: String[] | String;
+  slug_not_in?: String[] | String;
+  slug_lt?: String;
+  slug_lte?: String;
+  slug_gt?: String;
+  slug_gte?: String;
+  slug_contains?: String;
+  slug_not_contains?: String;
+  slug_starts_with?: String;
+  slug_not_starts_with?: String;
+  slug_ends_with?: String;
+  slug_not_ends_with?: String;
   AND?: AuthorWhereInput[] | AuthorWhereInput;
   OR?: AuthorWhereInput[] | AuthorWhereInput;
   NOT?: AuthorWhereInput[] | AuthorWhereInput;
 }
 
-export interface IdCreateInput {
-  oid: ID_Input;
-}
-
-export interface IdUpdateManyMutationInput {
-  oid?: ID_Input;
-}
-
-export interface IdCreateOneInput {
-  create?: IdCreateInput;
-  connect?: IdWhereUniqueInput;
-}
-
 export interface BookUpdateManyMutationInput {
   primary_isbn?: String;
+  title?: String;
+  bookkey?: String;
+  isbns?: BookUpdateisbnsInput;
+  price?: String;
+  amazon_rank?: Int;
+  publisher?: String;
+  primary_bisacs?: BookUpdateprimary_bisacsInput;
+  description?: String;
+  active?: Boolean;
+  image?: String;
 }
 
-export interface IdSubscriptionWhereInput {
-  mutation_in?: MutationType[] | MutationType;
-  updatedFields_contains?: String;
-  updatedFields_contains_every?: String[] | String;
-  updatedFields_contains_some?: String[] | String;
-  node?: IdWhereInput;
-  AND?: IdSubscriptionWhereInput[] | IdSubscriptionWhereInput;
-  OR?: IdSubscriptionWhereInput[] | IdSubscriptionWhereInput;
-  NOT?: IdSubscriptionWhereInput[] | IdSubscriptionWhereInput;
+export interface BookUpdateisbnsInput {
+  set?: String[] | String;
+}
+
+export interface AuthorCreateInput {
+  role?: Int;
+  firebrand_role?: String;
+  short_bio?: String;
+  firebrand_id?: Int;
+  display_name?: String;
+  first_name?: String;
+  last_name?: String;
+  slug?: String;
+}
+
+export interface AuthorUpdateManyWithWhereNestedInput {
+  where: AuthorScalarWhereInput;
+  data: AuthorUpdateManyDataInput;
+}
+
+export interface AuthorUpdateInput {
+  role?: Int;
+  firebrand_role?: String;
+  short_bio?: String;
+  firebrand_id?: Int;
+  display_name?: String;
+  first_name?: String;
+  last_name?: String;
+  slug?: String;
+}
+
+export interface AuthorScalarWhereInput {
+  id?: ID_Input;
+  id_not?: ID_Input;
+  id_in?: ID_Input[] | ID_Input;
+  id_not_in?: ID_Input[] | ID_Input;
+  id_lt?: ID_Input;
+  id_lte?: ID_Input;
+  id_gt?: ID_Input;
+  id_gte?: ID_Input;
+  id_contains?: ID_Input;
+  id_not_contains?: ID_Input;
+  id_starts_with?: ID_Input;
+  id_not_starts_with?: ID_Input;
+  id_ends_with?: ID_Input;
+  id_not_ends_with?: ID_Input;
+  role?: Int;
+  role_not?: Int;
+  role_in?: Int[] | Int;
+  role_not_in?: Int[] | Int;
+  role_lt?: Int;
+  role_lte?: Int;
+  role_gt?: Int;
+  role_gte?: Int;
+  firebrand_role?: String;
+  firebrand_role_not?: String;
+  firebrand_role_in?: String[] | String;
+  firebrand_role_not_in?: String[] | String;
+  firebrand_role_lt?: String;
+  firebrand_role_lte?: String;
+  firebrand_role_gt?: String;
+  firebrand_role_gte?: String;
+  firebrand_role_contains?: String;
+  firebrand_role_not_contains?: String;
+  firebrand_role_starts_with?: String;
+  firebrand_role_not_starts_with?: String;
+  firebrand_role_ends_with?: String;
+  firebrand_role_not_ends_with?: String;
+  short_bio?: String;
+  short_bio_not?: String;
+  short_bio_in?: String[] | String;
+  short_bio_not_in?: String[] | String;
+  short_bio_lt?: String;
+  short_bio_lte?: String;
+  short_bio_gt?: String;
+  short_bio_gte?: String;
+  short_bio_contains?: String;
+  short_bio_not_contains?: String;
+  short_bio_starts_with?: String;
+  short_bio_not_starts_with?: String;
+  short_bio_ends_with?: String;
+  short_bio_not_ends_with?: String;
+  firebrand_id?: Int;
+  firebrand_id_not?: Int;
+  firebrand_id_in?: Int[] | Int;
+  firebrand_id_not_in?: Int[] | Int;
+  firebrand_id_lt?: Int;
+  firebrand_id_lte?: Int;
+  firebrand_id_gt?: Int;
+  firebrand_id_gte?: Int;
+  display_name?: String;
+  display_name_not?: String;
+  display_name_in?: String[] | String;
+  display_name_not_in?: String[] | String;
+  display_name_lt?: String;
+  display_name_lte?: String;
+  display_name_gt?: String;
+  display_name_gte?: String;
+  display_name_contains?: String;
+  display_name_not_contains?: String;
+  display_name_starts_with?: String;
+  display_name_not_starts_with?: String;
+  display_name_ends_with?: String;
+  display_name_not_ends_with?: String;
+  first_name?: String;
+  first_name_not?: String;
+  first_name_in?: String[] | String;
+  first_name_not_in?: String[] | String;
+  first_name_lt?: String;
+  first_name_lte?: String;
+  first_name_gt?: String;
+  first_name_gte?: String;
+  first_name_contains?: String;
+  first_name_not_contains?: String;
+  first_name_starts_with?: String;
+  first_name_not_starts_with?: String;
+  first_name_ends_with?: String;
+  first_name_not_ends_with?: String;
+  last_name?: String;
+  last_name_not?: String;
+  last_name_in?: String[] | String;
+  last_name_not_in?: String[] | String;
+  last_name_lt?: String;
+  last_name_lte?: String;
+  last_name_gt?: String;
+  last_name_gte?: String;
+  last_name_contains?: String;
+  last_name_not_contains?: String;
+  last_name_starts_with?: String;
+  last_name_not_starts_with?: String;
+  last_name_ends_with?: String;
+  last_name_not_ends_with?: String;
+  slug?: String;
+  slug_not?: String;
+  slug_in?: String[] | String;
+  slug_not_in?: String[] | String;
+  slug_lt?: String;
+  slug_lte?: String;
+  slug_gt?: String;
+  slug_gte?: String;
+  slug_contains?: String;
+  slug_not_contains?: String;
+  slug_starts_with?: String;
+  slug_not_starts_with?: String;
+  slug_ends_with?: String;
+  slug_not_ends_with?: String;
+  AND?: AuthorScalarWhereInput[] | AuthorScalarWhereInput;
+  OR?: AuthorScalarWhereInput[] | AuthorScalarWhereInput;
+  NOT?: AuthorScalarWhereInput[] | AuthorScalarWhereInput;
+}
+
+export interface AuthorUpdateManyMutationInput {
+  role?: Int;
+  firebrand_role?: String;
+  short_bio?: String;
+  firebrand_id?: Int;
+  display_name?: String;
+  first_name?: String;
+  last_name?: String;
+  slug?: String;
 }
 
 export interface BookSubscriptionWhereInput {
@@ -286,29 +529,99 @@ export interface BookSubscriptionWhereInput {
   NOT?: BookSubscriptionWhereInput[] | BookSubscriptionWhereInput;
 }
 
-export type IdWhereUniqueInput = AtLeastOne<{
-  oid: ID_Input;
-}>;
-
-export interface AuthorCreateInput {
-  _id: IdCreateOneInput;
-  role: Int;
+export interface AuthorUpdateManyInput {
+  create?: AuthorCreateInput[] | AuthorCreateInput;
+  update?:
+    | AuthorUpdateWithWhereUniqueNestedInput[]
+    | AuthorUpdateWithWhereUniqueNestedInput;
+  upsert?:
+    | AuthorUpsertWithWhereUniqueNestedInput[]
+    | AuthorUpsertWithWhereUniqueNestedInput;
+  delete?: AuthorWhereUniqueInput[] | AuthorWhereUniqueInput;
+  connect?: AuthorWhereUniqueInput[] | AuthorWhereUniqueInput;
+  set?: AuthorWhereUniqueInput[] | AuthorWhereUniqueInput;
+  disconnect?: AuthorWhereUniqueInput[] | AuthorWhereUniqueInput;
+  deleteMany?: AuthorScalarWhereInput[] | AuthorScalarWhereInput;
+  updateMany?:
+    | AuthorUpdateManyWithWhereNestedInput[]
+    | AuthorUpdateManyWithWhereNestedInput;
 }
 
-export interface AuthorUpdateManyMutationInput {
-  role?: Int;
+export interface AuthorSubscriptionWhereInput {
+  mutation_in?: MutationType[] | MutationType;
+  updatedFields_contains?: String;
+  updatedFields_contains_every?: String[] | String;
+  updatedFields_contains_some?: String[] | String;
+  node?: AuthorWhereInput;
+  AND?: AuthorSubscriptionWhereInput[] | AuthorSubscriptionWhereInput;
+  OR?: AuthorSubscriptionWhereInput[] | AuthorSubscriptionWhereInput;
+  NOT?: AuthorSubscriptionWhereInput[] | AuthorSubscriptionWhereInput;
+}
+
+export interface BookCreateisbnsInput {
+  set?: String[] | String;
 }
 
 export interface AuthorCreateManyInput {
   create?: AuthorCreateInput[] | AuthorCreateInput;
+  connect?: AuthorWhereUniqueInput[] | AuthorWhereUniqueInput;
 }
 
-export interface IdUpdateInput {
-  oid?: ID_Input;
+export interface BookCreateInput {
+  primary_isbn: String;
+  title: String;
+  authors?: AuthorCreateManyInput;
+  bookkey?: String;
+  isbns?: BookCreateisbnsInput;
+  price?: String;
+  amazon_rank?: Int;
+  publisher?: String;
+  primary_bisacs?: BookCreateprimary_bisacsInput;
+  description?: String;
+  active?: Boolean;
+  image?: String;
+}
+
+export interface BookUpdateInput {
+  primary_isbn?: String;
+  title?: String;
+  authors?: AuthorUpdateManyInput;
+  bookkey?: String;
+  isbns?: BookUpdateisbnsInput;
+  price?: String;
+  amazon_rank?: Int;
+  publisher?: String;
+  primary_bisacs?: BookUpdateprimary_bisacsInput;
+  description?: String;
+  active?: Boolean;
+  image?: String;
+}
+
+export interface BookUpdateprimary_bisacsInput {
+  set?: String[] | String;
+}
+
+export interface AuthorUpsertWithWhereUniqueNestedInput {
+  where: AuthorWhereUniqueInput;
+  update: AuthorUpdateDataInput;
+  create: AuthorCreateInput;
 }
 
 export interface BookWhereInput {
-  _id?: IdWhereInput;
+  id?: ID_Input;
+  id_not?: ID_Input;
+  id_in?: ID_Input[] | ID_Input;
+  id_not_in?: ID_Input[] | ID_Input;
+  id_lt?: ID_Input;
+  id_lte?: ID_Input;
+  id_gt?: ID_Input;
+  id_gte?: ID_Input;
+  id_contains?: ID_Input;
+  id_not_contains?: ID_Input;
+  id_starts_with?: ID_Input;
+  id_not_starts_with?: ID_Input;
+  id_ends_with?: ID_Input;
+  id_not_ends_with?: ID_Input;
   primary_isbn?: String;
   primary_isbn_not?: String;
   primary_isbn_in?: String[] | String;
@@ -323,30 +636,213 @@ export interface BookWhereInput {
   primary_isbn_not_starts_with?: String;
   primary_isbn_ends_with?: String;
   primary_isbn_not_ends_with?: String;
+  title?: String;
+  title_not?: String;
+  title_in?: String[] | String;
+  title_not_in?: String[] | String;
+  title_lt?: String;
+  title_lte?: String;
+  title_gt?: String;
+  title_gte?: String;
+  title_contains?: String;
+  title_not_contains?: String;
+  title_starts_with?: String;
+  title_not_starts_with?: String;
+  title_ends_with?: String;
+  title_not_ends_with?: String;
   authors_every?: AuthorWhereInput;
   authors_some?: AuthorWhereInput;
   authors_none?: AuthorWhereInput;
+  bookkey?: String;
+  bookkey_not?: String;
+  bookkey_in?: String[] | String;
+  bookkey_not_in?: String[] | String;
+  bookkey_lt?: String;
+  bookkey_lte?: String;
+  bookkey_gt?: String;
+  bookkey_gte?: String;
+  bookkey_contains?: String;
+  bookkey_not_contains?: String;
+  bookkey_starts_with?: String;
+  bookkey_not_starts_with?: String;
+  bookkey_ends_with?: String;
+  bookkey_not_ends_with?: String;
+  price?: String;
+  price_not?: String;
+  price_in?: String[] | String;
+  price_not_in?: String[] | String;
+  price_lt?: String;
+  price_lte?: String;
+  price_gt?: String;
+  price_gte?: String;
+  price_contains?: String;
+  price_not_contains?: String;
+  price_starts_with?: String;
+  price_not_starts_with?: String;
+  price_ends_with?: String;
+  price_not_ends_with?: String;
+  amazon_rank?: Int;
+  amazon_rank_not?: Int;
+  amazon_rank_in?: Int[] | Int;
+  amazon_rank_not_in?: Int[] | Int;
+  amazon_rank_lt?: Int;
+  amazon_rank_lte?: Int;
+  amazon_rank_gt?: Int;
+  amazon_rank_gte?: Int;
+  publisher?: String;
+  publisher_not?: String;
+  publisher_in?: String[] | String;
+  publisher_not_in?: String[] | String;
+  publisher_lt?: String;
+  publisher_lte?: String;
+  publisher_gt?: String;
+  publisher_gte?: String;
+  publisher_contains?: String;
+  publisher_not_contains?: String;
+  publisher_starts_with?: String;
+  publisher_not_starts_with?: String;
+  publisher_ends_with?: String;
+  publisher_not_ends_with?: String;
+  description?: String;
+  description_not?: String;
+  description_in?: String[] | String;
+  description_not_in?: String[] | String;
+  description_lt?: String;
+  description_lte?: String;
+  description_gt?: String;
+  description_gte?: String;
+  description_contains?: String;
+  description_not_contains?: String;
+  description_starts_with?: String;
+  description_not_starts_with?: String;
+  description_ends_with?: String;
+  description_not_ends_with?: String;
+  active?: Boolean;
+  active_not?: Boolean;
+  image?: String;
+  image_not?: String;
+  image_in?: String[] | String;
+  image_not_in?: String[] | String;
+  image_lt?: String;
+  image_lte?: String;
+  image_gt?: String;
+  image_gte?: String;
+  image_contains?: String;
+  image_not_contains?: String;
+  image_starts_with?: String;
+  image_not_starts_with?: String;
+  image_ends_with?: String;
+  image_not_ends_with?: String;
   AND?: BookWhereInput[] | BookWhereInput;
   OR?: BookWhereInput[] | BookWhereInput;
   NOT?: BookWhereInput[] | BookWhereInput;
+}
+
+export type BookWhereUniqueInput = AtLeastOne<{
+  id: ID_Input;
+}>;
+
+export interface AuthorUpdateManyDataInput {
+  role?: Int;
+  firebrand_role?: String;
+  short_bio?: String;
+  firebrand_id?: Int;
+  display_name?: String;
+  first_name?: String;
+  last_name?: String;
+  slug?: String;
 }
 
 export interface NodeNode {
   id: ID_Output;
 }
 
-export interface AggregateId {
-  count: Int;
+export interface BatchPayload {
+  count: Long;
 }
 
-export interface AggregateIdPromise extends Promise<AggregateId>, Fragmentable {
-  count: () => Promise<Int>;
-}
-
-export interface AggregateIdSubscription
-  extends Promise<AsyncIterator<AggregateId>>,
+export interface BatchPayloadPromise
+  extends Promise<BatchPayload>,
     Fragmentable {
-  count: () => Promise<AsyncIterator<Int>>;
+  count: () => Promise<Long>;
+}
+
+export interface BatchPayloadSubscription
+  extends Promise<AsyncIterator<BatchPayload>>,
+    Fragmentable {
+  count: () => Promise<AsyncIterator<Long>>;
+}
+
+export interface PageInfo {
+  hasNextPage: Boolean;
+  hasPreviousPage: Boolean;
+  startCursor?: String;
+  endCursor?: String;
+}
+
+export interface PageInfoPromise extends Promise<PageInfo>, Fragmentable {
+  hasNextPage: () => Promise<Boolean>;
+  hasPreviousPage: () => Promise<Boolean>;
+  startCursor: () => Promise<String>;
+  endCursor: () => Promise<String>;
+}
+
+export interface PageInfoSubscription
+  extends Promise<AsyncIterator<PageInfo>>,
+    Fragmentable {
+  hasNextPage: () => Promise<AsyncIterator<Boolean>>;
+  hasPreviousPage: () => Promise<AsyncIterator<Boolean>>;
+  startCursor: () => Promise<AsyncIterator<String>>;
+  endCursor: () => Promise<AsyncIterator<String>>;
+}
+
+export interface BookPreviousValues {
+  id: ID_Output;
+  primary_isbn: String;
+  title: String;
+  bookkey?: String;
+  isbns: String[];
+  price?: String;
+  amazon_rank?: Int;
+  publisher?: String;
+  primary_bisacs: String[];
+  description?: String;
+  active?: Boolean;
+  image?: String;
+}
+
+export interface BookPreviousValuesPromise
+  extends Promise<BookPreviousValues>,
+    Fragmentable {
+  id: () => Promise<ID_Output>;
+  primary_isbn: () => Promise<String>;
+  title: () => Promise<String>;
+  bookkey: () => Promise<String>;
+  isbns: () => Promise<String[]>;
+  price: () => Promise<String>;
+  amazon_rank: () => Promise<Int>;
+  publisher: () => Promise<String>;
+  primary_bisacs: () => Promise<String[]>;
+  description: () => Promise<String>;
+  active: () => Promise<Boolean>;
+  image: () => Promise<String>;
+}
+
+export interface BookPreviousValuesSubscription
+  extends Promise<AsyncIterator<BookPreviousValues>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  primary_isbn: () => Promise<AsyncIterator<String>>;
+  title: () => Promise<AsyncIterator<String>>;
+  bookkey: () => Promise<AsyncIterator<String>>;
+  isbns: () => Promise<AsyncIterator<String[]>>;
+  price: () => Promise<AsyncIterator<String>>;
+  amazon_rank: () => Promise<AsyncIterator<Int>>;
+  publisher: () => Promise<AsyncIterator<String>>;
+  primary_bisacs: () => Promise<AsyncIterator<String[]>>;
+  description: () => Promise<AsyncIterator<String>>;
+  active: () => Promise<AsyncIterator<Boolean>>;
+  image: () => Promise<AsyncIterator<String>>;
 }
 
 export interface AuthorConnection {
@@ -370,69 +866,6 @@ export interface AuthorConnectionSubscription
   aggregate: <T = AggregateAuthorSubscription>() => T;
 }
 
-export interface IdPreviousValues {
-  oid: ID_Output;
-}
-
-export interface IdPreviousValuesPromise
-  extends Promise<IdPreviousValues>,
-    Fragmentable {
-  oid: () => Promise<ID_Output>;
-}
-
-export interface IdPreviousValuesSubscription
-  extends Promise<AsyncIterator<IdPreviousValues>>,
-    Fragmentable {
-  oid: () => Promise<AsyncIterator<ID_Output>>;
-}
-
-export interface Id {
-  oid: ID_Output;
-}
-
-export interface IdPromise extends Promise<Id>, Fragmentable {
-  oid: () => Promise<ID_Output>;
-}
-
-export interface IdSubscription
-  extends Promise<AsyncIterator<Id>>,
-    Fragmentable {
-  oid: () => Promise<AsyncIterator<ID_Output>>;
-}
-
-export interface IdEdge {
-  node: Id;
-  cursor: String;
-}
-
-export interface IdEdgePromise extends Promise<IdEdge>, Fragmentable {
-  node: <T = IdPromise>() => T;
-  cursor: () => Promise<String>;
-}
-
-export interface IdEdgeSubscription
-  extends Promise<AsyncIterator<IdEdge>>,
-    Fragmentable {
-  node: <T = IdSubscription>() => T;
-  cursor: () => Promise<AsyncIterator<String>>;
-}
-
-export interface Author {
-  role: Int;
-}
-
-export interface AuthorPromise extends Promise<Author>, Fragmentable {
-  _id: <T = IdPromise>() => T;
-  role: () => Promise<Int>;
-}
-
-export interface AuthorSubscription
-  extends Promise<AsyncIterator<Author>>,
-    Fragmentable {
-  _id: <T = IdSubscription>() => T;
-  role: () => Promise<AsyncIterator<Int>>;
-}
-
 export interface AggregateBook {
   count: Int;
 }
@@ -447,106 +880,6 @@ export interface AggregateBookSubscription
   extends Promise<AsyncIterator<AggregateBook>>,
     Fragmentable {
   count: () => Promise<AsyncIterator<Int>>;
-}
-
-export interface BookConnection {
-  pageInfo: PageInfo;
-  edges: BookEdge[];
-}
-
-export interface BookConnectionPromise
-  extends Promise<BookConnection>,
-    Fragmentable {
-  pageInfo: <T = PageInfoPromise>() => T;
-  edges: <T = FragmentableArray<BookEdge>>() => T;
-  aggregate: <T = AggregateBookPromise>() => T;
-}
-
-export interface BookConnectionSubscription
-  extends Promise<AsyncIterator<BookConnection>>,
-    Fragmentable {
-  pageInfo: <T = PageInfoSubscription>() => T;
-  edges: <T = Promise<AsyncIterator<BookEdgeSubscription>>>() => T;
-  aggregate: <T = AggregateBookSubscription>() => T;
-}
-
-export interface AggregateAuthor {
-  count: Int;
-}
-
-export interface AggregateAuthorPromise
-  extends Promise<AggregateAuthor>,
-    Fragmentable {
-  count: () => Promise<Int>;
-}
-
-export interface AggregateAuthorSubscription
-  extends Promise<AsyncIterator<AggregateAuthor>>,
-    Fragmentable {
-  count: () => Promise<AsyncIterator<Int>>;
-}
-
-export interface Book {
-  primary_isbn: String;
-}
-
-export interface BookPromise extends Promise<Book>, Fragmentable {
-  _id: <T = IdPromise>() => T;
-  primary_isbn: () => Promise<String>;
-  authors: <T = FragmentableArray<Author>>(
-    args?: {
-      where?: AuthorWhereInput;
-      orderBy?: AuthorOrderByInput;
-      skip?: Int;
-      after?: String;
-      before?: String;
-      first?: Int;
-      last?: Int;
-    }
-  ) => T;
-}
-
-export interface BookSubscription
-  extends Promise<AsyncIterator<Book>>,
-    Fragmentable {
-  _id: <T = IdSubscription>() => T;
-  primary_isbn: () => Promise<AsyncIterator<String>>;
-  authors: <T = Promise<AsyncIterator<AuthorSubscription>>>(
-    args?: {
-      where?: AuthorWhereInput;
-      orderBy?: AuthorOrderByInput;
-      skip?: Int;
-      after?: String;
-      before?: String;
-      first?: Int;
-      last?: Int;
-    }
-  ) => T;
-}
-
-export interface BookSubscriptionPayload {
-  mutation: MutationType;
-  node: Book;
-  updatedFields: String[];
-  previousValues: BookPreviousValues;
-}
-
-export interface BookSubscriptionPayloadPromise
-  extends Promise<BookSubscriptionPayload>,
-    Fragmentable {
-  mutation: () => Promise<MutationType>;
-  node: <T = BookPromise>() => T;
-  updatedFields: () => Promise<String[]>;
-  previousValues: <T = BookPreviousValuesPromise>() => T;
-}
-
-export interface BookSubscriptionPayloadSubscription
-  extends Promise<AsyncIterator<BookSubscriptionPayload>>,
-    Fragmentable {
-  mutation: () => Promise<AsyncIterator<MutationType>>;
-  node: <T = BookSubscription>() => T;
-  updatedFields: () => Promise<AsyncIterator<String[]>>;
-  previousValues: <T = BookPreviousValuesSubscription>() => T;
 }
 
 export interface AuthorSubscriptionPayload {
@@ -574,94 +907,113 @@ export interface AuthorSubscriptionPayloadSubscription
   previousValues: <T = AuthorPreviousValuesSubscription>() => T;
 }
 
-export interface BookPreviousValues {
-  primary_isbn: String;
-}
-
-export interface BookPreviousValuesPromise
-  extends Promise<BookPreviousValues>,
-    Fragmentable {
-  primary_isbn: () => Promise<String>;
-}
-
-export interface BookPreviousValuesSubscription
-  extends Promise<AsyncIterator<BookPreviousValues>>,
-    Fragmentable {
-  primary_isbn: () => Promise<AsyncIterator<String>>;
-}
-
 export interface AuthorPreviousValues {
-  role: Int;
+  id: ID_Output;
+  role?: Int;
+  firebrand_role?: String;
+  short_bio?: String;
+  firebrand_id?: Int;
+  display_name?: String;
+  first_name?: String;
+  last_name?: String;
+  slug?: String;
 }
 
 export interface AuthorPreviousValuesPromise
   extends Promise<AuthorPreviousValues>,
     Fragmentable {
+  id: () => Promise<ID_Output>;
   role: () => Promise<Int>;
+  firebrand_role: () => Promise<String>;
+  short_bio: () => Promise<String>;
+  firebrand_id: () => Promise<Int>;
+  display_name: () => Promise<String>;
+  first_name: () => Promise<String>;
+  last_name: () => Promise<String>;
+  slug: () => Promise<String>;
 }
 
 export interface AuthorPreviousValuesSubscription
   extends Promise<AsyncIterator<AuthorPreviousValues>>,
     Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
   role: () => Promise<AsyncIterator<Int>>;
+  firebrand_role: () => Promise<AsyncIterator<String>>;
+  short_bio: () => Promise<AsyncIterator<String>>;
+  firebrand_id: () => Promise<AsyncIterator<Int>>;
+  display_name: () => Promise<AsyncIterator<String>>;
+  first_name: () => Promise<AsyncIterator<String>>;
+  last_name: () => Promise<AsyncIterator<String>>;
+  slug: () => Promise<AsyncIterator<String>>;
 }
 
-export interface AuthorEdge {
-  node: Author;
-  cursor: String;
+export interface Book {
+  id: ID_Output;
+  primary_isbn: String;
+  title: String;
+  bookkey?: String;
+  isbns: String[];
+  price?: String;
+  amazon_rank?: Int;
+  publisher?: String;
+  primary_bisacs: String[];
+  description?: String;
+  active?: Boolean;
+  image?: String;
 }
 
-export interface AuthorEdgePromise extends Promise<AuthorEdge>, Fragmentable {
-  node: <T = AuthorPromise>() => T;
-  cursor: () => Promise<String>;
+export interface BookPromise extends Promise<Book>, Fragmentable {
+  id: () => Promise<ID_Output>;
+  primary_isbn: () => Promise<String>;
+  title: () => Promise<String>;
+  authors: <T = FragmentableArray<Author>>(
+    args?: {
+      where?: AuthorWhereInput;
+      orderBy?: AuthorOrderByInput;
+      skip?: Int;
+      after?: String;
+      before?: String;
+      first?: Int;
+      last?: Int;
+    }
+  ) => T;
+  bookkey: () => Promise<String>;
+  isbns: () => Promise<String[]>;
+  price: () => Promise<String>;
+  amazon_rank: () => Promise<Int>;
+  publisher: () => Promise<String>;
+  primary_bisacs: () => Promise<String[]>;
+  description: () => Promise<String>;
+  active: () => Promise<Boolean>;
+  image: () => Promise<String>;
 }
 
-export interface AuthorEdgeSubscription
-  extends Promise<AsyncIterator<AuthorEdge>>,
+export interface BookSubscription
+  extends Promise<AsyncIterator<Book>>,
     Fragmentable {
-  node: <T = AuthorSubscription>() => T;
-  cursor: () => Promise<AsyncIterator<String>>;
-}
-
-export interface BatchPayload {
-  count: Long;
-}
-
-export interface BatchPayloadPromise
-  extends Promise<BatchPayload>,
-    Fragmentable {
-  count: () => Promise<Long>;
-}
-
-export interface BatchPayloadSubscription
-  extends Promise<AsyncIterator<BatchPayload>>,
-    Fragmentable {
-  count: () => Promise<AsyncIterator<Long>>;
-}
-
-export interface IdSubscriptionPayload {
-  mutation: MutationType;
-  node: Id;
-  updatedFields: String[];
-  previousValues: IdPreviousValues;
-}
-
-export interface IdSubscriptionPayloadPromise
-  extends Promise<IdSubscriptionPayload>,
-    Fragmentable {
-  mutation: () => Promise<MutationType>;
-  node: <T = IdPromise>() => T;
-  updatedFields: () => Promise<String[]>;
-  previousValues: <T = IdPreviousValuesPromise>() => T;
-}
-
-export interface IdSubscriptionPayloadSubscription
-  extends Promise<AsyncIterator<IdSubscriptionPayload>>,
-    Fragmentable {
-  mutation: () => Promise<AsyncIterator<MutationType>>;
-  node: <T = IdSubscription>() => T;
-  updatedFields: () => Promise<AsyncIterator<String[]>>;
-  previousValues: <T = IdPreviousValuesSubscription>() => T;
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  primary_isbn: () => Promise<AsyncIterator<String>>;
+  title: () => Promise<AsyncIterator<String>>;
+  authors: <T = Promise<AsyncIterator<AuthorSubscription>>>(
+    args?: {
+      where?: AuthorWhereInput;
+      orderBy?: AuthorOrderByInput;
+      skip?: Int;
+      after?: String;
+      before?: String;
+      first?: Int;
+      last?: Int;
+    }
+  ) => T;
+  bookkey: () => Promise<AsyncIterator<String>>;
+  isbns: () => Promise<AsyncIterator<String[]>>;
+  price: () => Promise<AsyncIterator<String>>;
+  amazon_rank: () => Promise<AsyncIterator<Int>>;
+  publisher: () => Promise<AsyncIterator<String>>;
+  primary_bisacs: () => Promise<AsyncIterator<String[]>>;
+  description: () => Promise<AsyncIterator<String>>;
+  active: () => Promise<AsyncIterator<Boolean>>;
+  image: () => Promise<AsyncIterator<String>>;
 }
 
 export interface BookEdge {
@@ -681,48 +1033,121 @@ export interface BookEdgeSubscription
   cursor: () => Promise<AsyncIterator<String>>;
 }
 
-export interface IdConnection {
-  pageInfo: PageInfo;
-  edges: IdEdge[];
+export interface Author {
+  id: ID_Output;
+  role?: Int;
+  firebrand_role?: String;
+  short_bio?: String;
+  firebrand_id?: Int;
+  display_name?: String;
+  first_name?: String;
+  last_name?: String;
+  slug?: String;
 }
 
-export interface IdConnectionPromise
-  extends Promise<IdConnection>,
+export interface AuthorPromise extends Promise<Author>, Fragmentable {
+  id: () => Promise<ID_Output>;
+  role: () => Promise<Int>;
+  firebrand_role: () => Promise<String>;
+  short_bio: () => Promise<String>;
+  firebrand_id: () => Promise<Int>;
+  display_name: () => Promise<String>;
+  first_name: () => Promise<String>;
+  last_name: () => Promise<String>;
+  slug: () => Promise<String>;
+}
+
+export interface AuthorSubscription
+  extends Promise<AsyncIterator<Author>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  role: () => Promise<AsyncIterator<Int>>;
+  firebrand_role: () => Promise<AsyncIterator<String>>;
+  short_bio: () => Promise<AsyncIterator<String>>;
+  firebrand_id: () => Promise<AsyncIterator<Int>>;
+  display_name: () => Promise<AsyncIterator<String>>;
+  first_name: () => Promise<AsyncIterator<String>>;
+  last_name: () => Promise<AsyncIterator<String>>;
+  slug: () => Promise<AsyncIterator<String>>;
+}
+
+export interface BookSubscriptionPayload {
+  mutation: MutationType;
+  node: Book;
+  updatedFields: String[];
+  previousValues: BookPreviousValues;
+}
+
+export interface BookSubscriptionPayloadPromise
+  extends Promise<BookSubscriptionPayload>,
+    Fragmentable {
+  mutation: () => Promise<MutationType>;
+  node: <T = BookPromise>() => T;
+  updatedFields: () => Promise<String[]>;
+  previousValues: <T = BookPreviousValuesPromise>() => T;
+}
+
+export interface BookSubscriptionPayloadSubscription
+  extends Promise<AsyncIterator<BookSubscriptionPayload>>,
+    Fragmentable {
+  mutation: () => Promise<AsyncIterator<MutationType>>;
+  node: <T = BookSubscription>() => T;
+  updatedFields: () => Promise<AsyncIterator<String[]>>;
+  previousValues: <T = BookPreviousValuesSubscription>() => T;
+}
+
+export interface AuthorEdge {
+  node: Author;
+  cursor: String;
+}
+
+export interface AuthorEdgePromise extends Promise<AuthorEdge>, Fragmentable {
+  node: <T = AuthorPromise>() => T;
+  cursor: () => Promise<String>;
+}
+
+export interface AuthorEdgeSubscription
+  extends Promise<AsyncIterator<AuthorEdge>>,
+    Fragmentable {
+  node: <T = AuthorSubscription>() => T;
+  cursor: () => Promise<AsyncIterator<String>>;
+}
+
+export interface AggregateAuthor {
+  count: Int;
+}
+
+export interface AggregateAuthorPromise
+  extends Promise<AggregateAuthor>,
+    Fragmentable {
+  count: () => Promise<Int>;
+}
+
+export interface AggregateAuthorSubscription
+  extends Promise<AsyncIterator<AggregateAuthor>>,
+    Fragmentable {
+  count: () => Promise<AsyncIterator<Int>>;
+}
+
+export interface BookConnection {
+  pageInfo: PageInfo;
+  edges: BookEdge[];
+}
+
+export interface BookConnectionPromise
+  extends Promise<BookConnection>,
     Fragmentable {
   pageInfo: <T = PageInfoPromise>() => T;
-  edges: <T = FragmentableArray<IdEdge>>() => T;
-  aggregate: <T = AggregateIdPromise>() => T;
+  edges: <T = FragmentableArray<BookEdge>>() => T;
+  aggregate: <T = AggregateBookPromise>() => T;
 }
 
-export interface IdConnectionSubscription
-  extends Promise<AsyncIterator<IdConnection>>,
+export interface BookConnectionSubscription
+  extends Promise<AsyncIterator<BookConnection>>,
     Fragmentable {
   pageInfo: <T = PageInfoSubscription>() => T;
-  edges: <T = Promise<AsyncIterator<IdEdgeSubscription>>>() => T;
-  aggregate: <T = AggregateIdSubscription>() => T;
-}
-
-export interface PageInfo {
-  hasNextPage: Boolean;
-  hasPreviousPage: Boolean;
-  startCursor?: String;
-  endCursor?: String;
-}
-
-export interface PageInfoPromise extends Promise<PageInfo>, Fragmentable {
-  hasNextPage: () => Promise<Boolean>;
-  hasPreviousPage: () => Promise<Boolean>;
-  startCursor: () => Promise<String>;
-  endCursor: () => Promise<String>;
-}
-
-export interface PageInfoSubscription
-  extends Promise<AsyncIterator<PageInfo>>,
-    Fragmentable {
-  hasNextPage: () => Promise<AsyncIterator<Boolean>>;
-  hasPreviousPage: () => Promise<AsyncIterator<Boolean>>;
-  startCursor: () => Promise<AsyncIterator<String>>;
-  endCursor: () => Promise<AsyncIterator<String>>;
+  edges: <T = Promise<AsyncIterator<BookEdgeSubscription>>>() => T;
+  aggregate: <T = AggregateBookSubscription>() => T;
 }
 
 /*
@@ -759,10 +1184,6 @@ export const models: Model[] = [
   },
   {
     name: "Author",
-    embedded: false
-  },
-  {
-    name: "Id",
     embedded: false
   }
 ];

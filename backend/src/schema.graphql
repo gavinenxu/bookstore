@@ -1,8 +1,35 @@
 type Query {
   books: [Book!]!
-  authors: [author!]!
+  authors: [Author!]!
 }
 
 type Mutation {
-  createBook(primary_isbn: String!): Book
+  createBook(primary_isbn: String!, authors: [Author!]): Book!
+}
+
+type Book {
+  id: ID!
+  primary_isbn: String!
+  authors: [Author!]!
+  bookkey: String
+  isbns: [String]
+  price: String
+  amazon_rank: Int
+  publisher: String
+  primary_bisacs: [String]
+  description: String
+  active: Boolean
+  image: String
+}
+
+type Author {
+  id: ID!
+  role: Int!
+  firebrand_role: String
+  short_bio: String
+  firebrand_id: Int
+  display_name: String
+  first_name: String
+  last_name: String
+  slug: String
 }

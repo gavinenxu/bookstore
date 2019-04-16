@@ -1,43 +1,59 @@
-const { GraphQLServer } = require('graphql-yoga')
-const { prisma } = require('./generated/prisma-client')
+const { GraphQLServer } = require("graphql-yoga");
+const { prisma } = require("./generated/prisma-client");
 
 const resolvers = {
   Query: {
-    feed: (parent, args, context) => {
-      return context.prisma.posts({ where: { published: true } })
-    },
-    drafts: (parent, args, context) => {
-      return context.prisma.posts({ where: { published: false } })
-    },
-    post: (parent, { id }, context) => {
-      return context.prisma.post({ id })
-    },
+    books: (parent, args, context, info) => {
+      return context.prisma.books();
+    }
   },
   Mutation: {
-    createDraft(parent, { title, content }, context) {
-      return context.prisma.createPost({
+    createBook(
+      parent,
+      {
+        primary_isbn,
         title,
-        content,
-      })
-    },
-    deletePost(parent, { id }, context) {
-      return context.prisma.deletePost({ id })
-    },
-    publish(parent, { id }, context) {
-      return context.prisma.updatePost({
-        where: { id },
-        data: { published: true },
-      })
-    },
-  },
-}
+        authors,
+        bookkey,
+        isbns,
+        price,
+        amazon_rank,
+        publisher,
+        primary_bisacs,
+        description,
+        active,
+        image
+      },
+      context,
+      info
+    ) {
+      return context.prisma.createBook(
+        {
+          primary_isbn,
+          title,
+          authors,
+          bookkey,
+          isbns,
+          price,
+          amazon_rank,
+          publisher,
+          primary_bisacs,
+          description,
+          active,
+          image
+        },
+        info
+      );
+    }
+  }
+};
 
 const server = new GraphQLServer({
-  typeDefs: './src/schema.graphql',
+  typeDefs: "./src/schema.graphql",
   resolvers,
   context: {
-    prisma,
-  },
-})
+    prisma
+  }
+});
 
-server.start(() => console.log('Server is running on http://localhost:4000'))
+server.start(() => console.log("Server is running on http://localhost:4000"));
