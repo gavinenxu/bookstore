@@ -1,0 +1,8 @@
+type Query {
+  books: [Book!]!
+  authors: [author!]!
+}
+
+type Mutation {
+  createBook(primary_isbn: String!): Book
+}
