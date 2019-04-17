@@ -1,5 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
+import Search from './Search'
+import Nav from './Nav'
 
 const Logo = styled.h1`
   font-size: 4rem;
@@ -23,7 +25,11 @@ const Logo = styled.h1`
 const StyledHeader = styled.header`
   .bar {
     border-bottom: 10px solid ${props => props.theme.lightgrey};
-    @media (max-width: 800px) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    justify-content: space-between;
+    align-items: stretch;
+    @media (max-width: 600px) {
       grid-template-columns: 1fr;
       justify-content: center;
     }
@@ -42,9 +48,10 @@ export default function Header() {
         <Logo>
           <a href="https://openroadmedia.com/">Open Road Media</a>
         </Logo>
+        <Nav />
       </div>
       <div className="sub-bar">
-        <p>Search</p>
+        <Search />
       </div>
     </StyledHeader>
   )

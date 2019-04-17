@@ -24,3 +24,20 @@ export function rmSpecialChar(str) {
   }
   return null
 }
+
+export function parseQueryString(qs) {
+  const query = {}
+  const pairs = (qs[0] === '?' ? qs.substr(1) : qs).split('&')
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i < pairs.length; i++) {
+    const pair = pairs[i].split('=')
+    query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '')
+  }
+  return query
+}
+
+export function formatImageUrl(url) {
+  const regex = /http/
+  if (regex.test(url)) return url
+  return `http://${url}`
+}
